@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 func main() {
 
@@ -24,8 +27,7 @@ func main() {
 	//}
 
 	str := "hello 打本"
-	strArr := strings.Split(str,"")
-
-
+	strArr := strings.Split(str, "")
+	fmt.Println(strArr)
 
 }
