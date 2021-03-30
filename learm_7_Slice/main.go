@@ -7,16 +7,14 @@ func main() {
 	//切片的定义
 	SliceDefi()
 
-	//切片的附加
-	//s1 := []string{"广州", "上海", "北京"}
-	//s1 = append(s1, "深圳", "佛山")
-	//fmt.Println(s1)
-
 	//测试切片的引用和扩充
 	SliceCit()
 
+	//删除元素
+	DelElement()
 
 
+	
 }
 
 //切片的定义
@@ -29,8 +27,7 @@ func SliceDefi() {
 	s1 = []int{1, 2, 3}
 	fmt.Println(s1)
 
-	a := [...]int{1, 2, 4, 6, 9, 7, 3, 10, 9, 14, 15}
-	fmt.Printf("a: %d \n", len(a))
+	a := [10]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}
 
 	//通过一个数组获得一个切片
 	s2 := a[1:5]
@@ -64,31 +61,74 @@ func SliceDefi() {
 	fmt.Println(m1)
 }
 
-//测试切片的引用和扩充
+//测试切片的引用和扩容
 func SliceCit() {
-	//定义一个固定容量的数组
-	a := [15]int{1, 2, 3}
-	fmt.Printf("len(a):%d cap(a):%d  \n", len(a), cap(a))
 
-	//通过数组获得一个切片
-	a1 := a[3:]
-	fmt.Printf("len(a1):%d cap(a1):%d \n", len(a1), cap(a1))
+	//测试容量小于1024，扩容元素小于2倍以内的元素，是否会翻倍扩容容量
+	a1 := []int{1, 2, 3, 4, 5, 6, 7}
+	fmt.Printf("len(a1)=%d, cap(a1)=%d \n", len(a1), cap(a1)) //len(a1)=7, cap(a1)=7
+	a2 := append(a1, 1, 2, 3)
+	fmt.Printf("len(a2)=%d, cap(a2)=%d \n", len(a2), cap(a2)) //len(a2)=10, cap(a2)=14
 
-	//给这个切片附加一个元素，并查看其容量变化
-	a2 := append(a1, 9)
-	fmt.Printf("len(a2):%d cap(a2):%d \n", len(a2), cap(a2))
-	//测试是否还继续引用着a数组
-	a2[0] = 1
-	fmt.Println(a)
-	fmt.Println(a1)
+	//测试容量小于1024，且扩容添加的元素大于原数组容量的两倍是否会根据需要的容量作为实际容量
+	s1 := []int{1, 2, 3}
+	fmt.Printf("len(s1)=%d, cap(s1)=%d \n", len(s1), cap(s1)) //len(s1)=3, cap(s1)=3
+	s2 := append(s1, 4, 5, 6, 7, 8, 9)
+	fmt.Printf("len(s2)=%d, cap(s2)=%d \n", len(s2), cap(s2)) //len(s2)=9, cap(s2)=10 ，容量当遇到奇数+1
+
+	//测试容量大于1024的扩容机制，是否会根据文档所述以25%增加
+	d1 := [1025]int{}
+	for i := 0; i < 1025; i++ {
+		d1[i] = i
+	}
+	fmt.Printf("len(d1)=%d, cap(d1)=%d \n", len(d1), cap(d1)) //len(d1)=1025, cap(d1)=1025
+	d2 := d1[1:]
+	fmt.Printf("len(d2)=%d, cap(d2)=%d \n", len(d2), cap(d2)) //len(d2)=1024, cap(d2)=1024
+	d3 := append(d2, 1026)
+	fmt.Printf("len(d3)=%d, cap(d3)=%d \n", len(d3), cap(d3)) //len(d3)=1025, cap(d3)=1280 差不多是这个数
+
+	//测试切片引用的机制，在达不到新建数组情况下，还会继续引用原数组
+	//通过这个实验得出结论，如果底层数组的容量够用则不会重新创建数组，而是继续使用原数组
+	f1 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
+	f2 := append(f1, 10)
+	f3 := append(f2, 11)
+	f3[0] = 10
+	fmt.Printf("f1=%v  len(d3)=%d, cap(d3)=%d \n", f1, len(f1), cap(f1)) // f1=[1 2 3 4 5 6 7 8 9]  len(d3)=9, cap(d3)=9
+	fmt.Printf("f2=%v  len(d3)=%d, cap(d3)=%d \n", f2, len(f2), cap(f2)) // f2=[10 2 3 4 5 6 7 8 9 10]  len(d3)=10, cap(d3)=18
+	fmt.Printf("f3=%v  len(d3)=%d, cap(d3)=%d \n", f3, len(f3), cap(f3)) // f3=[10 2 3 4 5 6 7 8 9 10 11]  len(d3)=11, cap(d3)=18
+
+	//两个切片合并
+	g1 := []int{12, 13, 15}
+	g2 := []int{16, 18, 19}
+	g1 = append(g1, g2...)
+	fmt.Println(g1)
+}
+
+//删除元素
+func  DelElement()  {
+	a1 := [...]int{1, 2, 3, 4, 5, 6, 7, 8, 9}
+	//把上面a数组中的索引2，3的值删了
+	s1 := append(a1[:2], a1[3:]...)
+	fmt.Println(s1) //[1 2 4 5 6 7 8 9]
+	fmt.Println(a1) //[1 2 4 5 6 7 8 9 9]
+
+	//其实现的原理是
+	a2 := [...]int{1, 2, 3, 4, 5, 6, 7, 8, 9}
+	s2 := a2[:2]
+	for i := 3; i < len(a2); i++ {
+		s2 = append(s2, a2[i])
+	}
+	s2[0] = 100//测试是否还是继续引用原数组
+	fmt.Println(s2)
 	fmt.Println(a2)
 
-	//继续给a2切片添加容量，并观察a2 和 返回的a3的容量，发现其并扩充容量，还是继续使用a2底层的数组
-	a3 := append(a2, 8)
-	fmt.Printf("len(a2):%d cap(a2):%d \n", len(a2), cap(a2))
-	fmt.Printf("len(a3):%d cap(a3):%d \n", len(a3), cap(a3))
-	//通过查看这个就能得知a2和a3还是引用着
-	a3[0] = 9
-	fmt.Println(a2)
-	fmt.Println(a3)
+	//得出结论是，修改通过修改切片，那么就相当于修改原数组
+	//注意：数组的容量是不可变的，所以最多只是将数据的位置移动一下，或者将元素的值改掉
+
+	//查看内存地址
+	fmt.Println(&s2[0])
+	fmt.Println(&a2[0])
+	fmt.Println(&s2[3])
+	fmt.Println(&a2[3])
+
 }
