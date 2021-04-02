@@ -16,12 +16,12 @@ func newStudent(name, className string) *Student {
 	}
 }
 
-//特定函数
+//特定类型的函数
 func (s *Student) Show() {
 	fmt.Printf("姓名：%s 班级：%s", s.name, s.className)
 }
 
-//特定函数 和C#的扩展函数类似
+//特定类型的函数 和C#的扩展函数类似
 func main() {
 	newStudent("张三", "一班").Show()
 }
