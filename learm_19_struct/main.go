@@ -10,7 +10,6 @@ type Student struct {
 	code      int8
 }
 
-
 //构造函数，返回一个Student对象
 func newStudent(name, className, sex string, age, code int8) *Student {
 	return &Student{
@@ -76,8 +75,20 @@ func main() {
 	s1 := new(stu)
 	s1.name = "joh"
 	s1.code = 1
-
 	fmt.Println(s1)
+
+	//结构体的匿名字段
+	type person struct {
+		string
+		int
+	}
+	 p1 := person{
+	 	"sam",
+		 18,
+	 }
+	//p1.string = "sam"
+	//p1.int = 18
+	fmt.Println(p1)
 
 }
 
